@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Grid from "./Grid";
 import Compare from "./Compare";
 import Explanation from "./Explanation";
@@ -6,54 +6,9 @@ import Explanation from "./Explanation";
 export default function Game() {
   const [mode, setMode] = useState("human");
 
-  // 🔥 Touch handling refs
-  const touchStart = useRef({ x: 0, y: 0 });
-  const touchEnd = useRef({ x: 0, y: 0 });
-
-  const minSwipeDistance = 50;
-
-  // 👉 Touch start
-  const handleTouchStart = (e) => {
-    const touch = e.targetTouches[0];
-    touchStart.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  // 👉 Touch move
-  const handleTouchMove = (e) => {
-    const touch = e.targetTouches[0];
-    touchEnd.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  // 👉 Touch end → detect swipe
-  const handleTouchEnd = () => {
-    const dx = touchStart.current.x - touchEnd.current.x;
-    const dy = touchStart.current.y - touchEnd.current.y;
-
-    // Ignore small swipes
-    if (Math.abs(dx) < minSwipeDistance && Math.abs(dy) < minSwipeDistance)
-      return;
-
-    // Horizontal swipe
-    if (Math.abs(dx) > Math.abs(dy)) {
-      if (dx > 0) {
-        window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
-      } else {
-        window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
-      }
-    }
-    // Vertical swipe
-    else {
-      if (dy > 0) {
-        window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-      } else {
-        window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
-      }
-    }
-
-    // 🔥 Optional vibration feedback (mobile)
-    if (navigator.vibrate) {
-      navigator.vibrate(50);
-    }
+  // 🔥 Trigger keyboard move (used by buttons)
+  const triggerMove = (key) => {
+    window.dispatchEvent(new KeyboardEvent("keydown", { key }));
   };
 
   const modes = [
@@ -64,12 +19,7 @@ export default function Game() {
   ];
 
   return (
-    <div
-      className="min-h-screen bg-[#121212] text-white flex flex-col items-center py-10 px-4 selection:bg-yellow-400/30 touch-none select-none"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
+    <div className="min-h-screen bg-[#121212] text-white flex flex-col items-center py-10 px-4 selection:bg-yellow-400/30 select-none">
       
       {/* 🌌 Header */}
       <header className="text-center mb-10 space-y-2">
@@ -106,9 +56,51 @@ export default function Game() {
           </div>
         ) : (
           <div className="w-full flex flex-col lg:flex-row items-center lg:items-start justify-center gap-12 animate-in fade-in zoom-in-95 duration-500">
-            <div className="flex-shrink-0">
+            
+            {/* 🎯 Game + Controls */}
+            <div className="flex flex-col items-center">
               <Grid forcedMode={mode} />
+
+              {/* 📱 Mobile Arrow Controls */}
+              <div className="mt-6 flex flex-col items-center gap-2 md:hidden">
+                
+                {/* UP */}
+                <button
+                  onClick={() => triggerMove("ArrowUp")}
+                  className="w-14 h-14 bg-neutral-800/80 backdrop-blur-md border border-white/10 rounded-xl text-xl active:scale-95 hover:bg-yellow-400/20 transition"
+                >
+                  ⬆️
+                </button>
+
+                <div className="flex gap-2">
+                  {/* LEFT */}
+                  <button
+                    onClick={() => triggerMove("ArrowLeft")}
+                    className="w-14 h-14 bg-neutral-800/80 backdrop-blur-md border border-white/10 rounded-xl text-xl active:scale-95 hover:bg-yellow-400/20 transition"
+                  >
+                    ⬅️
+                  </button>
+
+                  {/* DOWN */}
+                  <button
+                    onClick={() => triggerMove("ArrowDown")}
+                    className="w-14 h-14 bg-neutral-800/80 backdrop-blur-md border border-white/10 rounded-xl text-xl active:scale-95 hover:bg-yellow-400/20 transition"
+                  >
+                    ⬇️
+                  </button>
+
+                  {/* RIGHT */}
+                  <button
+                    onClick={() => triggerMove("ArrowRight")}
+                    className="w-14 h-14 bg-neutral-800/80 backdrop-blur-md border border-white/10 rounded-xl text-xl active:scale-95 hover:bg-yellow-400/20 transition"
+                  >
+                    ➡️
+                  </button>
+                </div>
+              </div>
             </div>
+
+            {/* 📊 Explanation Panel */}
             <div className="max-w-md">
               <Explanation mode={mode} />
             </div>
