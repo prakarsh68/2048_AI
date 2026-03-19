@@ -6,19 +6,21 @@ export default {
   ],
   theme: {
     extend: {
+      // ✅ ADD THIS BLOCK
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+
       keyframes: {
-        // 🆕 Animation for new tiles appearing
         pop: {
           '0%': { transform: 'scale(0)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
-        // 🆕 Animation for tiles merging
         merge: {
           '0%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.15)' },
           '100%': { transform: 'scale(1)' },
         },
-        // 🆕 Smooth slide-in for the game board
         slideUp: {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },

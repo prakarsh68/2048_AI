@@ -169,7 +169,7 @@ export default function Grid({ forcedMode, externalRun }) {
         {gameOver && !isReplaying && (
           <div className="absolute inset-0 z-20 bg-black/80 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center animate-in zoom-in">
             <h2 className="text-4xl font-black text-white mb-4 italic">TERMINATED</h2>
-            <button onClick={startGame} className="bg-white text-black font-black py-3 px-8 rounded-xl hover:bg-yellow-400 transition-colors">REBOOT</button>
+            <button onClick={startGame} className="bg-white text-black font-semibold py-3 px-8 rounded-xl hover:bg-yellow-400 transition-colors">REBOOT</button>
           </div>
         )}
       </div>
@@ -185,7 +185,7 @@ export default function Grid({ forcedMode, externalRun }) {
           <button
             onClick={() => setAiRunning(!aiRunning)}
             disabled={isReplaying}
-            className={`flex-1 py-4 rounded-2xl font-black text-xs tracking-widest transition-all ${
+            className={`flex-1 py-4 rounded-2xl font-semibold text-sm tracking-normal transition-all ${
               aiRunning ? "bg-red-500/20 text-red-400 border border-red-500/50" : "bg-emerald-500 text-neutral-950"
             }`}
           >
@@ -195,11 +195,11 @@ export default function Grid({ forcedMode, externalRun }) {
         <button
           onClick={playReplay}
           disabled={isReplaying || replayBuffer.length < 2}
-          className="flex-1 bg-blue-600 disabled:opacity-20 text-white font-black py-4 rounded-2xl text-xs tracking-widest transition-all"
+          className="flex-1 bg-blue-600 disabled:opacity-20 text-white font-semibold py-4 rounded-2xl text-sm tracking-normal transition-all"
         >
           {isReplaying ? "WATCHING..." : "REPLAY"}
         </button>
-        <button onClick={startGame} className="p-4 bg-neutral-800 rounded-2xl text-white border border-white/5">🔄</button>
+        <button onClick={startGame} className="p-4 bg-neutral-800 rounded-2xl text-white border border-white/5 text-sm">🔄</button>
       </div>
 
     </div>
