@@ -3,52 +3,72 @@ export default function Explanation({ mode }) {
     switch (mode) {
       case "human":
         return {
-          title: "Manual Control",
+          title: "Manual Control (Human Mode)",
           description:
-            "In this mode, the player directly controls the game using arrow keys. The objective is to combine tiles with the same values to form higher-value tiles, ultimately aiming to reach 2048 or beyond.",
+            "This is the classic gameplay mode where decisions are made entirely by the player. It relies on pattern recognition, planning, and strategic tile placement.",
           details: [
-            "Control: Use arrow keys (↑ ↓ ← →) to move tiles.",
-            "Merging Rule: Tiles with the same number combine into one (e.g., 2 + 2 = 4).",
-            "Game Over: When no moves are possible.",
-            "Goal: Reach the 2048 tile (or higher for extended play).",
-            "Strategy 1: Keep your largest tile fixed in a corner.",
-            "Strategy 2: Build monotonic rows (descending order).",
-            "Strategy 3: Avoid random movements — think ahead!"
-          ]
+            "Use arrow keys (↑ ↓ ← →) to control tile movement.",
+            "Tiles merge when identical values collide (2 + 2 = 4).",
+            "New tiles (2 or 4) spawn randomly after each move.",
+            "Game ends when no moves are possible.",
+            "Primary goal: Reach the 2048 tile (or beyond)."
+          ],
+          working: [
+            "Observe grid structure",
+            "Plan moves ahead (2–3 steps)",
+            "Maintain tile hierarchy",
+            "Avoid breaking structure"
+          ],
+          analogy:
+            "Think of it like organizing books on a shelf — once you disturb the order, it's hard to fix."
         };
 
       case "minimax":
         return {
           title: "Minimax Algorithm",
           description:
-            "Minimax is a recursive decision-making algorithm used in AI and game theory. It explores all possible moves and simulates future states to choose the optimal move. In 2048, the AI assumes the worst possible tile spawn after every move.",
+            "Minimax is a recursive AI algorithm that explores all possible future moves to choose the optimal one. It assumes the worst-case scenario for every decision, making it highly reliable.",
           details: [
-            "Core Idea: Maximize score while minimizing risk.",
-            "Game Tree: Each move creates branches of possible future states.",
-            "Depth Search: Typically explores 3–5 moves ahead.",
-            "Maximizer: The AI selects the move with the highest evaluation score.",
-            "Minimizer: Simulates worst-case tile placement (random 2 or 4).",
-            "Time Complexity: O(b^d), where b = branching factor, d = depth.",
-            "Limitation: Can be slow for large depth due to exponential growth.",
-            "Use Case: Ideal for turn-based and deterministic decision systems."
-          ]
+            "Builds a complete game tree of possible states.",
+            "Alternates between AI (Maximizer) and Environment (Minimizer).",
+            "Evaluates each board using heuristic scoring.",
+            "Search depth typically ranges from 3–5 levels.",
+            "Selects move with best worst-case outcome."
+          ],
+          working: [
+            "Generate all possible moves",
+            "Simulate random tile placements",
+            "Evaluate each board state",
+            "Backpropagate best score",
+            "Choose optimal move"
+          ],
+          complexity: "O(b^d)",
+          analogy:
+            "Like playing chess and thinking: 'If I do this, what’s the worst that can happen next?'"
         };
 
       case "alphabeta":
         return {
           title: "Alpha-Beta Pruning",
           description:
-            "Alpha-Beta Pruning is an optimization over Minimax that reduces the number of nodes evaluated in the search tree. It skips branches that cannot influence the final decision, making the algorithm significantly faster while producing the same optimal result.",
+            "Alpha-Beta Pruning enhances Minimax by eliminating unnecessary branches in the decision tree. It improves performance without affecting the final decision.",
           details: [
-            "Optimization: Improves Minimax efficiency without changing results.",
-            "Alpha Value: Best score achievable by the maximizer so far.",
-            "Beta Value: Best score achievable by the minimizer so far.",
-            "Pruning Condition: Stop exploring when α ≥ β.",
-            "Performance Boost: Reduces node evaluations by 50–80%.",
-            "Depth Advantage: Allows deeper searches within same time.",
-            "Best Case Complexity: O(b^(d/2)) — much faster than Minimax.",
-            "Used In: Chess engines, AI games, decision systems."
-          ]
+            "Skips evaluating moves that won't affect outcome.",
+            "Uses Alpha (best max) and Beta (best min) bounds.",
+            "Prunes branches when Alpha ≥ Beta.",
+            "Allows deeper search within same time.",
+            "Maintains exact same result as Minimax."
+          ],
+          working: [
+            "Track best scores (α and β)",
+            "Compare during traversal",
+            "Prune irrelevant branches",
+            "Focus only on impactful paths",
+            "Return optimal decision faster"
+          ],
+          complexity: "O(b^(d/2))",
+          analogy:
+            "Like skipping boring scenes in a movie because you already know they won’t affect the ending."
         };
 
       default:
@@ -60,16 +80,25 @@ export default function Explanation({ mode }) {
   if (!content) return null;
 
   return (
-    <div className="w-full max-w-xl bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-5 transition-all duration-300 hover:shadow-yellow-500/10">
-      
+    <div className="w-full max-w-xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-5 hover:shadow-yellow-500/10 transition">
+
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-yellow-400/10 rounded-lg animate-pulse">
-          <span className="text-xl">🧠</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-yellow-400/10 rounded-lg animate-pulse">
+            🧠
+          </div>
+          <h2 className="text-xl font-bold text-white">
+            {content.title}
+          </h2>
         </div>
-        <h2 className="text-xl font-bold text-white tracking-tight">
-          {content.title}
-        </h2>
+
+        {/* Complexity Badge */}
+        {content.complexity && (
+          <span className="text-[10px] px-2 py-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded">
+            {content.complexity}
+          </span>
+        )}
       </div>
 
       {/* Description */}
@@ -77,61 +106,70 @@ export default function Explanation({ mode }) {
         {content.description}
       </p>
 
-      {/* Details */}
-      <ul className="grid grid-cols-1 gap-2">
+      {/* Core Details */}
+      <ul className="space-y-2">
         {content.details.map((detail, i) => (
-          <li
-            key={i}
-            className="flex items-start gap-2 text-xs text-neutral-400 hover:text-neutral-200 transition"
-          >
-            <span className="text-yellow-500 mt-1">▹</span>
+          <li key={i} className="flex gap-2 text-xs text-neutral-400">
+            <span className="text-yellow-500">▹</span>
             {detail}
           </li>
         ))}
       </ul>
 
-      {/* Heuristic Section */}
+      {/* Working Flow */}
+      {content.working && (
+        <div className="pt-3">
+          <p className="text-[10px] uppercase text-neutral-500 mb-2 font-bold">
+            How It Works
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {content.working.map((step, i) => (
+              <span
+                key={i}
+                className="px-2 py-1 bg-white/5 text-[10px] rounded border border-white/10"
+              >
+                {step}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Heuristics */}
       {mode !== "human" && (
-        <div className="pt-4 mt-4 border-t border-white/5">
-          <p className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 font-bold">
+        <div className="pt-3">
+          <p className="text-[10px] uppercase text-neutral-500 mb-2 font-bold">
             Evaluation Heuristics
           </p>
-
           <div className="grid grid-cols-2 gap-2">
             {[
-              {
-                name: "Monotonicity",
-                desc: "Encourages ordered tiles (high → low)"
-              },
-              {
-                name: "Smoothness",
-                desc: "Penalizes large differences between neighbors"
-              },
-              {
-                name: "Empty Cells",
-                desc: "More empty space = more flexibility"
-              },
-              {
-                name: "Max Tile Corner",
-                desc: "Keeps highest tile fixed in a corner"
-              }
+              "Monotonicity",
+              "Smoothness",
+              "Empty Cells",
+              "Max Tile Corner"
             ].map((h) => (
               <div
-                key={h.name}
-                className="p-2 bg-white/5 rounded-lg border border-white/5 text-[10px] text-neutral-400"
+                key={h}
+                className="p-2 bg-white/5 rounded border border-white/10 text-[10px]"
               >
-                <p className="font-semibold text-neutral-300">{h.name}</p>
-                <p className="text-[9px] opacity-70">{h.desc}</p>
+                {h}
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Extra Footer for Project */}
+      {/* Analogy */}
+      {content.analogy && (
+        <div className="pt-3 text-[10px] text-neutral-500 italic border-t border-white/5">
+          💡 {content.analogy}
+        </div>
+      )}
+
+      {/* Footer */}
       {mode !== "human" && (
-        <div className="pt-3 text-[9px] text-neutral-600 italic text-center">
-          This AI evaluates thousands of possible states in milliseconds to make optimal decisions.
+        <div className="text-[9px] text-center text-neutral-600 pt-2">
+          AI evaluates thousands of states per second to make optimal decisions.
         </div>
       )}
     </div>
