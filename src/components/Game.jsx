@@ -1,10 +1,60 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Grid from "./Grid";
 import Compare from "./Compare";
 import Explanation from "./Explanation";
 
 export default function Game() {
   const [mode, setMode] = useState("human");
+
+  // 🔥 Touch handling refs
+  const touchStart = useRef({ x: 0, y: 0 });
+  const touchEnd = useRef({ x: 0, y: 0 });
+
+  const minSwipeDistance = 50;
+
+  // 👉 Touch start
+  const handleTouchStart = (e) => {
+    const touch = e.targetTouches[0];
+    touchStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  // 👉 Touch move
+  const handleTouchMove = (e) => {
+    const touch = e.targetTouches[0];
+    touchEnd.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  // 👉 Touch end → detect swipe
+  const handleTouchEnd = () => {
+    const dx = touchStart.current.x - touchEnd.current.x;
+    const dy = touchStart.current.y - touchEnd.current.y;
+
+    // Ignore small swipes
+    if (Math.abs(dx) < minSwipeDistance && Math.abs(dy) < minSwipeDistance)
+      return;
+
+    // Horizontal swipe
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 0) {
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
+      } else {
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+      }
+    }
+    // Vertical swipe
+    else {
+      if (dy > 0) {
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+      } else {
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+      }
+    }
+
+    // 🔥 Optional vibration feedback (mobile)
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+  };
 
   const modes = [
     { id: "human", label: "🎮 Human", color: "hover:bg-blue-500" },
@@ -14,9 +64,14 @@ export default function Game() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white flex flex-col items-center py-10 px-4 selection:bg-yellow-400/30">
+    <div
+      className="min-h-screen bg-[#121212] text-white flex flex-col items-center py-10 px-4 selection:bg-yellow-400/30 touch-none select-none"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       
-      {/* Header Section */}
+      {/* 🌌 Header */}
       <header className="text-center mb-10 space-y-2">
         <h1 className="text-4xl sm:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600">
           2048 AI BATTLE
@@ -26,7 +81,7 @@ export default function Game() {
         </p>
       </header>
 
-      {/* Navigation Tab System */}
+      {/* 🎮 Mode Selector */}
       <nav className="flex flex-wrap gap-2 p-1.5 bg-neutral-800/50 backdrop-blur-md rounded-2xl border border-white/5 mb-12 shadow-2xl">
         {modes.map((m) => (
           <button
@@ -43,7 +98,7 @@ export default function Game() {
         ))}
       </nav>
 
-      {/* Main Content Area */}
+      {/* 🧠 Main Content */}
       <main className="w-full max-w-6xl flex flex-col items-center">
         {mode === "compare" ? (
           <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -61,7 +116,7 @@ export default function Game() {
         )}
       </main>
 
-      {/* Footer Branding */}
+      {/* 🧾 Footer */}
       <footer className="mt-20 opacity-30 text-[10px] tracking-[0.2em] uppercase">
         Built with React & AI Optimization
       </footer>
