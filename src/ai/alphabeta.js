@@ -1,75 +1,83 @@
-import { moveLeft, moveRight, moveUp, moveDown } from "../utils/gameLogic";
+import { moveLeft, moveRight, moveUp, moveDown, isDifferent } from "../utils/gameLogic";
 import { evaluateGrid } from "./heuristics";
 
-// 🔥 Define moves properly (fix for your error)
-const moves = {
+const moveFuncs = {
+  up: moveUp,
+  down: moveDown,
   left: moveLeft,
   right: moveRight,
-  up: moveUp,
-  down: moveDown
 };
 
+/**
+ * Alpha-Beta Pruning Optimized for 2048
+ */
 export function alphaBeta(grid, depth, alpha, beta, isMax) {
-  let nodes = 1; // 📊 count nodes
+  let totalNodes = 1;
 
-  // 🧠 Base case
+  // 1. Base Case: Game over or Depth reached
+  // We check depth first for performance
   if (depth === 0) {
-    return { score: evaluateGrid(grid), nodes };
+    return { score: evaluateGrid(grid), nodes: 1 };
   }
 
-  // 🤖 MAX PLAYER (AI)
+  // 🤖 MAX PLAYER (The AI trying to win)
   if (isMax) {
     let best = { score: -Infinity, move: null };
+    let movedAny = false;
 
-    for (let key in moves) {
-      let newGrid = moves[key](grid);
+    for (const direction in moveFuncs) {
+      const nextGrid = moveFuncs[direction](grid);
 
-      // Skip invalid move
-      if (JSON.stringify(newGrid) === JSON.stringify(grid)) continue;
-
-      let result = alphaBeta(newGrid, depth - 1, alpha, beta, false);
-      nodes += result.nodes;
+      // 🏎️ Optimization: Fast fail for invalid moves
+      if (!isDifferent(grid, nextGrid)) continue;
+      
+      movedAny = true;
+      const result = alphaBeta(nextGrid, depth - 1, alpha, beta, false);
+      totalNodes += result.nodes;
 
       if (result.score > best.score) {
-        best = { score: result.score, move: key };
+        best = { score: result.score, move: direction };
       }
 
-      // 🔥 Alpha update
       alpha = Math.max(alpha, best.score);
-
-      // ✂️ PRUNING
-      if (beta <= alpha) break;
+      if (beta <= alpha) break; // ✂️ Prune
     }
 
-    return { ...best, nodes };
-  }
+    // If no moves possible, it's a dead end (low score)
+    if (!movedAny) return { score: -1e6, nodes: 1 };
 
-  // 🎲 MIN PLAYER (random tile placement)
+    return { ...best, nodes: totalNodes };
+  } 
+  
+  // 🎲 MIN PLAYER (The Computer spawning tiles)
   else {
     let worst = { score: Infinity };
+    const emptyCells = [];
 
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        if (grid[i][j] === 0) {
-          let newGrid = grid.map(r => [...r]);
-          newGrid[i][j] = 2; // simulate worst-case tile
-
-          let result = alphaBeta(newGrid, depth - 1, alpha, beta, true);
-          nodes += result.nodes;
-
-          if (result.score < worst.score) {
-            worst = { score: result.score };
-          }
-
-          // 🔥 Beta update
-          beta = Math.min(beta, worst.score);
-
-          // ✂️ PRUNING
-          if (beta <= alpha) break;
-        }
+    // Find all empty spots
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        if (grid[r][c] === 0) emptyCells.push({ r, c });
       }
     }
 
-    return { ...worst, nodes };
+    // 🏎️ Optimization: If too many empty cells, only simulate a subset 
+    // to prevent tree explosion, or focus on the 'worst' positions.
+    for (const cell of emptyCells) {
+      const nextGrid = grid.map(row => [...row]);
+      nextGrid[cell.r][cell.c] = 2; // Usually simulate a '2' as it's 90% likely
+
+      const result = alphaBeta(nextGrid, depth - 1, alpha, beta, true);
+      totalNodes += result.nodes;
+
+      if (result.score < worst.score) {
+        worst = { score: result.score };
+      }
+
+      beta = Math.min(beta, worst.score);
+      if (beta <= alpha) break; // ✂️ Prune
+    }
+
+    return { ...worst, nodes: totalNodes };
   }
 }
