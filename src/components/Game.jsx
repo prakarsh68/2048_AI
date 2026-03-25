@@ -73,11 +73,11 @@ export default function Game() {
               {/* 📱 Mobile D-PAD */}
               <div className="grid grid-cols-3 gap-2 md:hidden">
                 <div />
-                <ControlBtn icon="向上" action={() => triggerMove("ArrowUp")} />
+                <ControlBtn icon="UP" action={() => triggerMove("ArrowUp")} />
                 <div />
-                <ControlBtn icon="向左" action={() => triggerMove("ArrowLeft")} />
-                <ControlBtn icon="向下" action={() => triggerMove("ArrowDown")} />
-                <ControlBtn icon="向右" action={() => triggerMove("ArrowRight")} />
+                <ControlBtn icon="LEFT" action={() => triggerMove("ArrowLeft")} />
+                <ControlBtn icon="DOWN" action={() => triggerMove("ArrowDown")} />
+                <ControlBtn icon="RIGHT" action={() => triggerMove("ArrowRight")} />
               </div>
             </div>
 
